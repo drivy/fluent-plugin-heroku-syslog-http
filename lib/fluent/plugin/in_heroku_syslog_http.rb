@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'fluent/plugin/in_http'
-require 'fluent/plugin/parser_regexp'
 
 module Fluent
   module Plugin

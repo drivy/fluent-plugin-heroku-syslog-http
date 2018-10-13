@@ -3,7 +3,6 @@
 require 'helper'
 require 'fluent/test/driver/input'
 require 'fluent/plugin/in_heroku_syslog_http'
-require 'fluent/plugin/filter_heroku_syslog_http'
 
 require 'net/http'
 
