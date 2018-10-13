@@ -37,7 +37,7 @@ module Fluent
         23  => 'local7'
       }.freeze
 
-      PRIORITY_MAP = {
+      SEVERITY_MAP = {
         0  => 'emerg',
         1  => 'alert',
         2  => 'crit',
@@ -56,7 +56,7 @@ module Fluent
         if record && record['syslog.pri']
           pri = record['syslog.pri'].to_i
           record['syslog.facility'] = FACILITY_MAP[pri >> 3]
-          record['syslog.priority'] = PRIORITY_MAP[pri & 0b111]
+          record['syslog.severity'] = SEVERITY_MAP[pri & 0b111]
         end
         record
       end

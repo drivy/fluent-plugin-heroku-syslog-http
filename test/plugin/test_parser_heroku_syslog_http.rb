@@ -35,7 +35,7 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
     event = {
       'syslog.pri' => '13',
       'syslog.facility' => 'user',
-      'syslog.priority' => 'notice',
+      'syslog.severity' => 'notice',
       'syslog.hostname' => 'host',
       'syslog.appname' => 'app',
       'syslog.procid' => 'web.1',
@@ -53,15 +53,15 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
     d = create_driver
 
     d.instance.parse('00 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
-      assert_equal 'notice', record['syslog.priority']
+      assert_equal 'notice', record['syslog.severity']
       assert_equal 'user', record['syslog.facility']
     end
     d.instance.parse('00 <42>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
-      assert_equal 'crit', record['syslog.priority']
+      assert_equal 'crit', record['syslog.severity']
       assert_equal 'syslog', record['syslog.facility']
     end
     d.instance.parse('00 <27>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
-      assert_equal 'err', record['syslog.priority']
+      assert_equal 'err', record['syslog.severity']
       assert_equal 'daemon', record['syslog.facility']
     end
   end
