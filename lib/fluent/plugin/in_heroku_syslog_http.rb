@@ -25,7 +25,7 @@ module Fluent
           @parser.parse(msg) do |time, record|
             raise "Could not parse event: #{content}" if record.nil?
 
-            record['time'] ||= Time.at(time).utc.strftime('%Y-%m-%dT%H:%M:%S%z')
+            record['syslog.timestamp'] ||= Time.at(time).utc.strftime('%Y-%m-%dT%H:%M:%S%z')
             record['drain_id'] = params['HTTP_LOGPLEX_DRAIN_TOKEN']
             unless @drain_ids.nil? || @drain_ids.include?(record['drain_id'])
               log.warn "drain_id not match: #{msg.inspect}"

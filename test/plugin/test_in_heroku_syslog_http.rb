@@ -52,25 +52,9 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
       '59 <13>1 2014-01-30T07:35:00.123456+09:00 host app web.1 - bar'
     ]
 
-    events = [
-      ['heroku', Time.strptime('2014-01-29T07:25:52+01:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'facility' => 'user',
-        'ident' => 'app',
-        'message' => 'foo',
-        'pid' => 'web.1',
-        'pri' => '13',
-        'priority' => 'notice'
-      }],
-      ['heroku', Time.strptime('2014-01-30T07:35:00+09:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'facility' => 'user',
-        'ident' => 'app',
-        'message' => 'bar',
-        'pid' => 'web.1',
-        'pri' => '13',
-        'priority' => 'notice'
-      }]
+    event_times = [
+      Time.strptime('2014-01-29T06:25:52+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i,
+      Time.strptime('2014-01-30T07:35:00+09:00', '%Y-%m-%dT%H:%M:%S%z').to_i
     ]
 
     d.run(expect_records: 2, timeout: 5) do
@@ -79,7 +63,8 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
       assert_equal '200', res.code
     end
 
-    assert_equal events, d.events
+    assert_equal event_times[0], d.events[0][1]
+    assert_equal event_times[1], d.events[1][1]
   end
 
   def test_msg_size
@@ -89,35 +74,18 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
-    # # tests = create_test_case
 
-    events = [
-      ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'ident' => 'app',
-        'pid' => 'web.1',
-        'message' => 'x' * 100,
-        'pri' => '13',
-        'facility' => 'user',
-        'priority' => 'notice'
-      }],
-      ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'ident' => 'app',
-        'pid' => 'web.1',
-        'message' => 'x' * 1024,
-        'pri' => '13',
-        'facility' => 'user',
-        'priority' => 'notice'
-      }]
+    event_messages = [
+      'x' * 100,
+      'x' * 1024
     ]
-
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
       assert_equal '200', res.code
     end
 
-    assert_equal events, d.events
+    assert_equal event_messages[0], d.events[0][2]['message']
+    assert_equal event_messages[1], d.events[1][2]['message']
   end
 
   def test_accept_matched_drain_id_multiple
@@ -126,36 +94,15 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
     ))
 
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
-    ]
-
-    events = [
-      ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'ident' => 'app',
-        'pid' => 'web.1',
-        'message' => 'x' * 100,
-        'pri' => '13',
-        'facility' => 'user',
-        'priority' => 'notice'
-      }],
-      ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
-        'ident' => 'app',
-        'pid' => 'web.1',
-        'message' => 'x' * 1024,
-        'pri' => '13',
-        'facility' => 'user',
-        'priority' => 'notice'
-      }]
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
 
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
       assert_equal '200', res.code
     end
-    assert_equal events, d.events
+    assert_equal 2, d.events.length
   end
 
   def test_ignore_unmatched_drain_id
@@ -164,8 +111,8 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
     ))
 
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
 
     d.run(expect_records: 0, timeout: 5) do

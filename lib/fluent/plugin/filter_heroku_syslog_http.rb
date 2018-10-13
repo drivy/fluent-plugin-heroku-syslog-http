@@ -8,7 +8,7 @@ module Fluent
     class HerokuSyslogHttpParser < RegexpParser
       Fluent::Plugin.register_parser('heroku_syslog_http', self)
 
-      SYSLOG_HTTP_REGEXP = %r{^([0-9]+)\s+\<(?<pri>[0-9]+)\>[0-9]* (?<time>[^ ]*) (?<drain_id>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*) (?<pid>[a-zA-Z0-9\.]+)? *- *(?<message>.*)$}
+      SYSLOG_HTTP_REGEXP = %r{^([0-9]+) +\<(?<syslog.pri>[0-9]+)\>([0-9]+) (?<syslog.timestamp>[^ ]+) (?<syslog.hostname>[^ ]+) (?<syslog.appname>[^ ]+) (?<syslog.procid>[^ ]+) - *(?<message>.*)$}
 
       FACILITY_MAP = {
         0   => 'kern',
@@ -49,19 +49,19 @@ module Fluent
       }.freeze
 
       config_param :expression, :regexp, default: SYSLOG_HTTP_REGEXP
+      config_set_default :time_key, 'syslog.timestamp'
 
       def parse_prival(record)
-        if record && record['pri']
-          pri = record['pri'].to_i
-          record['facility'] = FACILITY_MAP[pri >> 3]
-          record['priority'] = PRIORITY_MAP[pri & 0b111]
+        if record && record['syslog.pri']
+          pri = record['syslog.pri'].to_i
+          record['syslog.facility'] = FACILITY_MAP[pri >> 3]
+          record['syslog.priority'] = PRIORITY_MAP[pri & 0b111]
         end
         record
       end
 
       def parse(text)
         super(text) do |time, record|
-          binding.pry
           yield time, parse_prival(record)
         end
       end
