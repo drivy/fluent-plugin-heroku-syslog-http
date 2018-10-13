@@ -46,17 +46,16 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
   end
 
   def test_time_format
-    d = create_driver
     messages = [
       '59 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo',
       '59 <13>1 2014-01-30T07:35:00.123456+09:00 host app web.1 - bar'
     ]
-
     event_times = [
       Time.strptime('2014-01-29T06:25:52+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i,
       Time.strptime('2014-01-30T07:35:00+09:00', '%Y-%m-%dT%H:%M:%S%z').to_i
     ]
 
+    d = create_driver
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
       assert_equal '', res.body
@@ -68,59 +67,65 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
   end
 
   def test_msg_size
-    d = create_driver
-
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
 
-    event_messages = [
-      'x' * 100,
-      'x' * 1024
-    ]
+    d = create_driver
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
       assert_equal '200', res.code
     end
 
-    assert_equal event_messages[0], d.events[0][2]['message']
-    assert_equal event_messages[1], d.events[1][2]['message']
+    assert_equal 'x' * 100, d.events[0][2]['message']
+    assert_equal 'x' * 1024, d.events[1][2]['message']
   end
 
   def test_accept_matched_drain_id_multiple
-    d = create_driver(CONFIG + %(
-      drain_ids ["abc", "d.fc6b856b-3332-4546-93de-7d0ee272c3bd"]
-    ))
-
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
-
+    d = create_driver(CONFIG + %(
+      drain_ids ["abc", "d.fc6b856b-3332-4546-93de-7d0ee272c3bd"]
+    ))
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
       assert_equal '200', res.code
     end
+
     assert_equal 2, d.events.length
   end
 
   def test_ignore_unmatched_drain_id
-    d = create_driver(CONFIG + %(
-      drain_ids ["abc"]
-    ))
-
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
-
+    d = create_driver(CONFIG + %(
+      drain_ids ["abc"]
+    ))
     d.run(expect_records: 0, timeout: 5) do
       res = post(messages)
       assert_equal '200', res.code
     end
 
     assert_equal 0, d.events.length
+  end
+
+  def test_logplex_metas
+    messages = [
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100
+    ]
+    d = create_driver
+    d.run(expect_records: 1, timeout: 5) do
+      res = post(messages)
+      assert_equal '200', res.code
+    end
+
+    assert_equal '09C557EAFCFB6CF2740EE62F62971098', d.events[0][2]['logplex.frame_id']
+    assert_equal 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd', d.events[0][2]['logplex.drain_id']
   end
 
   def post(messages)
