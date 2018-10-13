@@ -39,6 +39,7 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
       'syslog.hostname' => 'host',
       'syslog.appname' => 'app',
       'syslog.procid' => 'web.1',
+      'syslog.timestamp' => '2014-01-29T06:25:52.589365+00:00',
       'message' => 'foo'
     }
     d = create_driver

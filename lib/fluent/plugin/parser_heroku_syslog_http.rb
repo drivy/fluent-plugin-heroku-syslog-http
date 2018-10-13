@@ -48,8 +48,9 @@ module Fluent
         7  => 'debug'
       }.freeze
 
-      config_param :expression, :regexp, default: SYSLOG_HTTP_REGEXP
+      config_set_default :expression, SYSLOG_HTTP_REGEXP
       config_set_default :time_key, 'syslog.timestamp'
+      config_set_default :keep_time_key, true
 
       def parse_prival(record)
         if record && record['syslog.pri']
