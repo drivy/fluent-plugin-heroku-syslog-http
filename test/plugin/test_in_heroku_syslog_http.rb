@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'helper'
 require 'fluent/test/driver/input'
 require 'fluent/plugin/in_heroku_syslog_http'
@@ -21,15 +23,15 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
   end
 
   PORT = unused_port
-  CONFIG = %[
+  CONFIG = %(
     @type heroku_syslog_http
     port #{PORT}
     bind 127.0.0.1
     body_size_limit 10m
     keepalive_timeout 5
-  ]
+  )
 
-  def create_driver(conf=CONFIG)
+  def create_driver(conf = CONFIG)
     Fluent::Test::Driver::Input.new(Fluent::Plugin::HerokuSyslogHttpInput).configure(conf)
   end
 
@@ -45,34 +47,34 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
     d = create_driver
     messages = [
       '59 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo',
-      '59 <13>1 2014-01-30T07:35:00.123456+09:00 host app web.1 - bar',
+      '59 <13>1 2014-01-30T07:35:00.123456+09:00 host app web.1 - bar'
     ]
 
     events = [
       ['heroku', Time.strptime('2014-01-29T07:25:52+01:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        "drain_id"=>"d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-        "facility"=>"user",
-        "ident"=>"app",
-        "message"=>"foo",
-        "pid"=>"web.1",
-        "pri"=>"13",
-        "priority"=>"notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'facility' => 'user',
+        'ident' => 'app',
+        'message' => 'foo',
+        'pid' => 'web.1',
+        'pri' => '13',
+        'priority' => 'notice'
       }],
       ['heroku', Time.strptime('2014-01-30T07:35:00+09:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        "drain_id"=>"d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-        "facility"=>"user",
-        "ident"=>"app",
-        "message"=>"bar",
-        "pid"=>"web.1",
-        "pri"=>"13",
-        "priority"=>"notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'facility' => 'user',
+        'ident' => 'app',
+        'message' => 'bar',
+        'pid' => 'web.1',
+        'pri' => '13',
+        'priority' => 'notice'
       }]
     ]
 
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
-      assert_equal "", res.body
-      assert_equal "200", res.code
+      assert_equal '', res.body
+      assert_equal '200', res.code
     end
 
     assert_equal events, d.events
@@ -83,84 +85,90 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024,
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
     # # tests = create_test_case
 
     events = [
       ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-         "drain_id" => "d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-         "ident" => "app",
-         "pid" => "web.1",
-         "message" => "x" * 100,
-         "pri" => "13",
-         "facility" => "user",
-         "priority" => "notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'ident' => 'app',
+        'pid' => 'web.1',
+        'message' => 'x' * 100,
+        'pri' => '13',
+        'facility' => 'user',
+        'priority' => 'notice'
       }],
       ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        "drain_id" => "d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-        "ident" => "app",
-        "pid" => "web.1",
-        "message" => "x" * 1024,
-        "pri" => "13",
-        "facility" => "user",
-        "priority" => "notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'ident' => 'app',
+        'pid' => 'web.1',
+        'message' => 'x' * 1024,
+        'pri' => '13',
+        'facility' => 'user',
+        'priority' => 'notice'
       }]
     ]
 
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
-      assert_equal"200", res.code
+      assert_equal '200', res.code
     end
 
     assert_equal events, d.events
   end
 
   def test_accept_matched_drain_id_multiple
-    d = create_driver(CONFIG + "\ndrain_ids [\"abc\", \"d.fc6b856b-3332-4546-93de-7d0ee272c3bd\"]")
+    d = create_driver(CONFIG + %(
+      drain_ids ["abc", "d.fc6b856b-3332-4546-93de-7d0ee272c3bd"]
+    ))
+
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024,
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
 
     events = [
       ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        "drain_id" => "d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-        "ident" => "app",
-        "pid" => "web.1",
-        "message" => "x" * 100,
-        "pri" => "13",
-        "facility" => "user",
-        "priority" => "notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'ident' => 'app',
+        'pid' => 'web.1',
+        'message' => 'x' * 100,
+        'pri' => '13',
+        'facility' => 'user',
+        'priority' => 'notice'
       }],
       ['heroku', Time.strptime('2014-01-01T01:23:45+00:00', '%Y-%m-%dT%H:%M:%S%z').to_i, {
-        "drain_id" => "d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-        "ident" => "app",
-        "pid" => "web.1",
-        "message" => "x" * 1024,
-        "pri" => "13",
-        "facility" => "user",
-        "priority" => "notice"
+        'drain_id' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+        'ident' => 'app',
+        'pid' => 'web.1',
+        'message' => 'x' * 1024,
+        'pri' => '13',
+        'facility' => 'user',
+        'priority' => 'notice'
       }]
     ]
 
     d.run(expect_records: 2, timeout: 5) do
       res = post(messages)
-      assert_equal"200", res.code
+      assert_equal '200', res.code
     end
     assert_equal events, d.events
   end
 
   def test_ignore_unmatched_drain_id
-    d = create_driver(CONFIG + "\ndrain_ids [\"abc\"]")
+    d = create_driver(CONFIG + %(
+      drain_ids ["abc"]
+    ))
+
     messages = [
       '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024,
+      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
 
     d.run(expect_records: 0, timeout: 5) do
       res = post(messages)
-      assert_equal "200", res.code
+      assert_equal '200', res.code
     end
 
     assert_equal 0, d.events.length
@@ -168,16 +176,16 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
   def post(messages)
     # https://github.com/heroku/logplex/blob/master/doc/README.http_drains.md
-    http = Net::HTTP.new("127.0.0.1", PORT)
-    req = Net::HTTP::Post.new("/heroku", {
-      "Content-Type" => "application/logplex-1",
-      "Logplex-Msg-Count" => messages.length.to_s,
-      "Logplex-Frame-Id" => "09C557EAFCFB6CF2740EE62F62971098",
-      "Logplex-Drain-Token" => "d.fc6b856b-3332-4546-93de-7d0ee272c3bd",
-      "User-Agent" => "Logplex/v49"
-    })
+    http = Net::HTTP.new('127.0.0.1', PORT)
+    headers = {
+      'Content-Type' => 'application/logplex-1',
+      'Logplex-Msg-Count' => messages.length.to_s,
+      'Logplex-Frame-Id' => '09C557EAFCFB6CF2740EE62F62971098',
+      'Logplex-Drain-Token' => 'd.fc6b856b-3332-4546-93de-7d0ee272c3bd',
+      'User-Agent' => 'Logplex/v49'
+    }
+    req = Net::HTTP::Post.new('/heroku', headers)
     req.body = messages.join("\n")
     http.request(req)
   end
-
 end
