@@ -1,0 +1,35 @@
+aliases:
+  - &step_cache_restore_deps
+    restore_cache:
+      keys:
+        - drivy-rails-fluent-plugin-heroku-syslog-http-{{ .Branch }}-{{ .Revision }}
+        - drivy-rails-fluent-plugin-heroku-syslog-http-{{ .Branch }}
+        - drivy-rails-fluent-plugin-heroku-syslog-http-
+  - &step_cache_save_deps
+    save_cache:
+      key: drivy-rails-fluent-plugin-heroku-syslog-http-{{ .Branch }}-{{ .Revision }}
+      paths: [ vendor/bundle ]
+  - &step_bundler_install_deps
+    run: bundle install --path vendor/bundle --jobs=2 --without development:deployment
+
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/ruby:2.4
+    steps:
+      - checkout
+      - *step_cache_restore_deps
+      # Bundler install
+      - *step_bundler_install_deps
+      - run: bundle clean
+      - *step_cache_save_deps
+      # Run tests
+      - run: bundle exec rake
+
+workflows:
+  version: 2
+
+  test-and-deploy:
+    jobs:
+      - checkout
