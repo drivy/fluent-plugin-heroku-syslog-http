@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 Gem::Specification.new do |gem|
-  gem.name          = 'fluent-plugin-heroku-syslog'
-  gem.version       = '0.1.1'
-  gem.authors       = ['Kazuyuki Honda']
-  gem.email         = ['hakobera@gmail.com']
+  gem.name          = 'fluent-plugin-heroku-syslog-http'
+  gem.version       = '0.2.0'
+  gem.authors       = ['Drivy', 'Kazuyuki Honda']
+  gem.email         = ['sre@drivy.com']
   gem.description   = 'fluent plugin to drain heroku syslog'
   gem.summary       = 'fluent plugin to drain heroku syslog'
-  gem.homepage      = 'https://github.com/hakobera/fluent-plugin-heroku-syslog'
+  gem.homepage      = 'https://github.com/drivy/fluent-plugin-heroku-syslog-http'
   gem.license       = 'APLv2'
 
   gem.files         = `git ls-files`.split($ORS)

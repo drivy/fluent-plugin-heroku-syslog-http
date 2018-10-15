@@ -1,8 +1,6 @@
-# fluent-plugin-heroku-syslog
+# fluent-plugin-heroku-syslog-http
 
-[fluent](http://fluentd.org) plugin to drain heroku syslog.
-
-[![Build Status](https://travis-ci.org/hakobera/fluent-plugin-heroku-syslog.png?branch=master)](https://travis-ci.org/hakobera/fluent-plugin-heroku-syslog)
+Plugins to accept and parse syslog input from [heroku http(s) drains](https://devcenter.heroku.com/articles/log-drains#http-s-drains), based on fluentd'd [http input](https://docs.fluentd.org/v1.0/articles/in_http) and [regexp parser](https://docs.fluentd.org/v1.0/articles/parser_regexp)
 
 ## Installation
 
@@ -10,36 +8,15 @@ Install with gem or fluent-gem command as:
 
 ```
 # for fluentd
-$ gem install fluent-plugin-heroku-syslog
+$ gem install fluent-plugin-heroku-syslog-http
 
 # for td-agent
-$ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-heroku-syslog
+$ sudo /usr/lib64/fluent/ruby/bin/fluent-gem install fluent-plugin-heroku-syslog-http
 ```
 
-## Component
+## Usage
 
-### HerokuSyslogInput
-
-Plugin to accept syslog input from [heroku syslog drains](https://devcenter.heroku.com/articles/log-drains#syslog-drains).
-
-#### Configuration
-
-```
-<source>
-  type heroku_syslog
-  port 5140
-  bind 0.0.0.0
-  tag  heroku
-</source>
-```
-
-### HerokuSyslogHttpInput
-
-Plugin to accept syslog input from [heroku http(s) drains](https://devcenter.heroku.com/articles/log-drains#http-s-drains).
-
-#### Configuration
-
-##### Basic
+### Configure heroku_syslog_http input
 
 ```
 <source>
@@ -47,24 +24,34 @@ Plugin to accept syslog input from [heroku http(s) drains](https://devcenter.her
   port 9880
   bind 0.0.0.0
   tag  heroku
+  drain_ids ["YOUR-HEROKU-DRAIN-ID"] # optional
 </source>
 ```
 
-##### Filter by drain_ids
+### Example
 
+Heroku's http syslog format:
+`00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo`
+
+Will parse the following key/values:
 ```
-<source>
-  type heroku_syslog_http
-  port 9880
-  bind 0.0.0.0
-  tag  heroku
-  drain_ids ["YOUR-HEROKU-DRAIN-ID"]
-</source>
+{
+  'syslog.pri' => '13',
+  'syslog.facility' => 'user',
+  'syslog.severity' => 'notice',
+  'syslog.hostname' => 'host',
+  'syslog.appname' => 'app',
+  'syslog.procid' => 'web.1',
+  'syslog.timestamp' => '2014-01-29T06:25:52.589365+00:00',
+  'message' => 'foo'
+}
 ```
+
 
 ## Copyright
 
 - Copyright
-  - Copyright(C) 2014- Kazuyuki Honda (hakobera)
+  - Copytight(C) 2018- Drivy
+  - Copyright(C) 2014-2018 Kazuyuki Honda (hakobera)
 - License
   - Apache License, Version 2.0
