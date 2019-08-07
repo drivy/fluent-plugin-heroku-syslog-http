@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'fluent-plugin-heroku-syslog-http'
-  gem.version       = '0.2.0'
+  gem.version       = '0.2.1'
   gem.authors       = ['Drivy', 'Kazuyuki Honda']
   gem.email         = ['sre@drivy.com']
   gem.description   = 'fluent plugin to drain heroku syslog'
