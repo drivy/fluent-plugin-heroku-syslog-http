@@ -67,8 +67,8 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
   def test_msg_size
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
+      '156 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100,
+      '1080 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 1024
     ]
 
     d = create_driver
@@ -83,8 +83,8 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
   def test_accept_matched_drain_id_multiple
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
+      '59 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
+      '59 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
     d = create_driver(CONFIG + %(
       drain_ids ["abc", "d.fc6b856b-3332-4546-93de-7d0ee272c3bd"]
@@ -99,8 +99,8 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
   def test_ignore_unmatched_drain_id
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
+      '59 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',
+      '59 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - bar'
     ]
     d = create_driver(CONFIG + %(
       drain_ids ["abc"]
@@ -115,7 +115,7 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
 
   def test_logplex_metas
     messages = [
-      '00 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100
+      '156 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - ' + 'x' * 100
     ]
     d = create_driver
     d.run(expect_records: 1, timeout: 5) do
@@ -138,7 +138,7 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
       'User-Agent' => 'Logplex/v49'
     }
     req = Net::HTTP::Post.new('/heroku', headers)
-    req.body = messages.join("\n")
+    req.body = messages.join('')
     http.request(req)
   end
 end

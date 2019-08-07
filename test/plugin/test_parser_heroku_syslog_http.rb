@@ -30,7 +30,7 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
   end
 
   def test_parsing_with_default_conf
-    text = '59 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo'
+    text = '<13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo'
     expected_time = Time.strptime('2014-01-29T07:25:52+01:00', '%Y-%m-%dT%H:%M:%S%z').to_i
     event = {
       'syslog.pri' => '13',
@@ -52,15 +52,15 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
   def test_parsing_pri_conf
     d = create_driver
 
-    d.instance.parse('00 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
+    d.instance.parse('<13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
       assert_equal 'notice', record['syslog.severity']
       assert_equal 'user', record['syslog.facility']
     end
-    d.instance.parse('00 <42>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
+    d.instance.parse('<42>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
       assert_equal 'crit', record['syslog.severity']
       assert_equal 'syslog', record['syslog.facility']
     end
-    d.instance.parse('00 <27>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
+    d.instance.parse('<27>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo') do |_, record|
       assert_equal 'err', record['syslog.severity']
       assert_equal 'daemon', record['syslog.facility']
     end

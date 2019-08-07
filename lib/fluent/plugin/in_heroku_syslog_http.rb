@@ -18,8 +18,18 @@ module Fluent
         content = params[EVENT_RECORD_PARAMETER]
         raise "'#{EVENT_RECORD_PARAMETER}' parameter is required" unless content
 
+        messages = []
+        while payload = content.match(/^([0-9]+) (.*)$/) do
+          length = payload[1].to_i
+          raise "Invalid message length specified: #{length}" unless payload[2].size >= length
+
+          messages << payload[2][0...length]
+          content = payload[2][length..-1] || ''
+        end
+        content << content
+        raise "#{content.size} bytes left in payload" unless content.size == 0
+
         records = []
-        messages = content.split("\n")
         messages.each do |msg|
           @parser.parse(msg) do |time, record|
             raise "Could not parse event: #{content}" if record.nil?
@@ -34,6 +44,7 @@ module Fluent
             records << record
           end
         end
+
         [nil, records]
       end
     end
