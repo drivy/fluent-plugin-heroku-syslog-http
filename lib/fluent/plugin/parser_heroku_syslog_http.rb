@@ -8,7 +8,7 @@ module Fluent
     class HerokuSyslogHttpParser < RegexpParser
       Fluent::Plugin.register_parser('heroku_syslog_http', self)
 
-      SYSLOG_HTTP_REGEXP = %r{^\<(?<syslog.pri>[0-9]+)\>([0-9]+) (?<syslog.timestamp>[^ ]+) (?<syslog.hostname>[^ ]+) (?<syslog.appname>[^ ]+) (?<syslog.procid>[^ ]+) - *(?<message>.*)$}
+      SYSLOG_HTTP_REGEXP = %r{^\<(?<syslog.pri>[0-9]+)\>([0-9]+) (?<syslog.timestamp>[^ ]+) (?<syslog.hostname>[^ ]+) (?<syslog.appname>[^ ]+) (?<syslog.procid>[^ ]+) - *(?<message>.*)$}m
 
       FACILITY_MAP = {
         0   => 'kern',

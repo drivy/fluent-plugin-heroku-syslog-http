@@ -81,6 +81,22 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
     assert_equal 'x' * 1024, d.events[1][2]['message']
   end
 
+  def test_newlines_in_payload
+    messages = [
+      "60 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - foo\n",
+      "60 <13>1 2014-01-29T06:25:52.589365+00:00 host app web.1 - bar\n",
+    ]
+    d = create_driver
+    d.run(expect_records: 1, timeout: 5) do
+      res = post(messages)
+      assert_equal '', res.body
+      assert_equal '200', res.code
+    end
+
+    assert_equal "foo\n", d.events[0][2]['message']
+    assert_equal "bar\n", d.events[1][2]['message']
+  end
+
   def test_accept_matched_drain_id_multiple
     messages = [
       '59 <13>1 2014-01-01T01:23:45.123456+00:00 host app web.1 - foo',

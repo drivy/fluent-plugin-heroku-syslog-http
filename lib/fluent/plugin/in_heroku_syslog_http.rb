@@ -19,15 +19,14 @@ module Fluent
         raise "'#{EVENT_RECORD_PARAMETER}' parameter is required" unless content
 
         messages = []
-        while payload = content.match(/^([0-9]+) (.*)$/) do
+        while payload = content.match(/^([0-9]+) (.*)$/m) do
           length = payload[1].to_i
-          raise "Invalid message length specified: #{length}" unless payload[2].size >= length
+          log.warn "Invalid message length specified: #{length}" unless payload[2].size >= length
 
           messages << payload[2][0...length]
           content = payload[2][length..-1] || ''
         end
-        content << content
-        raise "#{content.size} bytes left in payload" unless content.size == 0
+        log.warn "#{content.size} bytes left in payload" unless content.size == 0
 
         records = []
         messages.each do |msg|
