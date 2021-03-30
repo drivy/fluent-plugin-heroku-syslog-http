@@ -2,9 +2,9 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'fluent-plugin-heroku-syslog-http'
-  gem.version       = '0.2.1'
-  gem.authors       = ['Drivy', 'Kazuyuki Honda']
-  gem.email         = ['sre@drivy.com']
+  gem.version       = '0.2.4'
+  gem.authors       = ['GetAround']
+  gem.email         = ['sre@getaround.com']
   gem.description   = 'fluent plugin to drain heroku syslog'
   gem.summary       = 'fluent plugin to drain heroku syslog'
   gem.homepage      = 'https://github.com/drivy/fluent-plugin-heroku-syslog-http'
@@ -16,6 +16,6 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
 
   gem.add_runtime_dependency 'fluentd', '~> 1.0', '>= 1.0.0'
-  gem.add_development_dependency 'rake', '~> 12.0'
-  gem.add_development_dependency 'test-unit', '~> 3.1', '>= 3.1.0'
+  gem.add_development_dependency 'rake', '~> 13.0'
+  gem.add_development_dependency 'test-unit', '~> 3.4'
 end
