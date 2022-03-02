@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '3.0.0'
+ruby '2.7.4'
 
 # Specify your gem's dependencies in fluent-plugin-heroku-syslog.gemspec
 gemspec

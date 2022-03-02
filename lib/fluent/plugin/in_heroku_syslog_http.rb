@@ -30,7 +30,7 @@ module Fluent
 
         records = []
         messages.each do |msg|
-          @parser.parse(msg) do |time, record|
+          @custom_parser.parse(msg) do |time, record|
             raise "Could not parse event: #{content}" if record.nil?
 
             record['syslog.timestamp'] ||= Time.at(time).utc.strftime('%Y-%m-%dT%H:%M:%S%z')
