@@ -22,7 +22,8 @@ class HerokuSyslogHttpParseTest < Test::Unit::TestCase
     Fluent::Test.setup
   end
 
-  def create_driver(conf = {})
+  def create_driver(conf = '')
+    conf = Fluent::Config.parse(conf, "(test)", "(test_dir)")
     d = Struct.new(:instance).new
     d.instance = Fluent::Plugin::HerokuSyslogHttpParser.new
     d.instance.configure(conf)

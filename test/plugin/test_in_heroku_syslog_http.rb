@@ -33,6 +33,7 @@ class HerokuSyslogHttpInputTest < Test::Unit::TestCase
   )
 
   def create_driver(conf = CONFIG)
+    conf = Fluent::Config.parse(conf, "(test)", "(test_dir)")
     Fluent::Test::Driver::Input.new(Fluent::Plugin::HerokuSyslogHttpInput).configure(conf)
   end
 

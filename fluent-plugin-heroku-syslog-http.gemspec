@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'fluent-plugin-heroku-syslog-http'
-  gem.version       = '0.3'
+  gem.version       = '0.4'
   gem.authors       = ['GetAround']
   gem.email         = ['sre@getaround.com']
   gem.description   = 'fluent plugin to drain heroku syslog'
@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ['lib']
 
-  gem.add_runtime_dependency 'fluentd', '~> 1.0', '>= 1.8'
+  gem.add_runtime_dependency 'fluentd', '~> 1.0', '>= 1.17'
   gem.add_development_dependency 'rake', '~> 13.0'
   gem.add_development_dependency 'test-unit', '~> 3.4'
 end

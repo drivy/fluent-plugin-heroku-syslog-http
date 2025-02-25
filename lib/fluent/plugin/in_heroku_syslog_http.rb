@@ -28,7 +28,6 @@ module Fluent
         end
         log.warn "#{content.size} bytes left in payload" unless content.size == 0
 
-        records = []
         messages.each do |msg|
           @custom_parser.parse(msg) do |time, record|
             raise "Could not parse event: #{content}" if record.nil?
@@ -40,11 +39,9 @@ module Fluent
               log.warn "drain_id not match: #{msg.inspect}"
               next
             end
-            records << record
+            yield time, record
           end
         end
-
-        [nil, records]
       end
     end
   end
